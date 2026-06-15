@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Little Bookshelf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #f5f0e8;
+      --card:   #faf7f2;
+      --text:   #3a2e24;
+      --muted:  #9a8a76;
+      --border: #ddd0be;
+      --sage:   #7a9678;
+      --moss:   #526f50;
+      --rose:   #c4887e;
+      --warm:   #d4a87a;
+      --blush:  #eeddd8;
+      --radius: 12px;
+    }
+
+    /* ── 14 distinct genre colours ── */
+    :root {
+      --g0:  #f5eeea; --g0t:  #a0685c;  /* Travel          — terracotta   */
+      --g1:  #eaeef5; --g1t:  #4a6a9a;  /* Mystery         — slate blue   */
+      --g2:  #f5eaed; --g2t:  #9a4a60;  /* Historical Fic  — burgundy     */
+      --g3:  #eaf5ee; --g3t:  #3a8050;  /* Sequential Art  — forest       */
+      --g4:  #f5f2ea; --g4t:  #8a7030;  /* Classics        — antique gold */
+      --g5:  #eaeaf5; --g5t:  #5a50a0;  /* Philosophy      — indigo       */
+      --g6:  #f5eaf5; --g6t:  #904890;  /* Romance         — plum         */
+      --g7:  #eaf5f5; --g7t:  #308888;  /* Womens Fiction  — teal         */
+      --g8:  #f5f0ea; --g8t:  #906840;  /* Fiction         — caramel      */
+      --g9:  #eaf0f5; --g9t:  #406888;  /* Childrens       — steel blue   */
+      --g10: #f5eaee; --g10t: #984060;  /* Religion        — mauve        */
+      --g11: #eaf5f0; --g11t: #309068;  /* Nonfiction      — mint green   */
+      --g12: #f0eaf5; --g12t: #705898;  /* Music           — violet       */
+      --g13: #f5f5ea; --g13t: #787830;  /* Default         — olive        */
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 70% 50% at 0% 0%,   rgba(122,150,120,0.09) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(196,136,126,0.07) 0%, transparent 60%);
+    }
+
+    /* subtle paper grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 999;
+      opacity: 0.022;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ════════════════════════════════
+       HEADER  (v2 feel)
+    ════════════════════════════════ */
+    header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 64px 48px 40px;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 18px;
+    }
+
+    .eyebrow::after {
+      content: '';
+      width: 60px; height: 1px;
+      background: var(--border);
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-optical-sizing: auto;
+      font-size: clamp(2.6rem, 5.5vw, 4.4rem);
+      line-height: 1.08;
+      color: var(--text);
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--moss);
+    }
+
+    .header-tagline {
+      margin-top: 10px;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--muted);
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+    }
+
+    .header-stats {
+      margin-top: 28px;
+      display: flex;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-num {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* botanical divider */
+    .deco {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--sage);
+      font-size: 13px;
+      letter-spacing: 0.5em;
+      opacity: 0.5;
+      margin-bottom: 0;
+    }
+
+    .deco::before, .deco::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ════════════════════════════════
+       CONTROLS  (original layout)
+    ════════════════════════════════ */
+    .controls {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 48px 20px;
+      animation: fadeUp 0.9s 0.12s ease both;
+    }
+
+    .search-wrap {
+      margin-bottom: 16px;
+      max-width: 380px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-wrap input:focus {
+      border-color: var(--sage);
+      box-shadow: 0 0 0 3px rgba(122,150,120,0.1);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .filter-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover  { border-color: var(--sage); color: var(--text); }
+    .filter-btn.active { background: var(--moss); border-color: var(--moss); color: #fff; }
+
+    .sort-wrap { margin-left: auto; }
+
+    .sort-wrap select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 30px 5px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--muted);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a8a76' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      transition: border-color 0.2s;
+    }
+
+    .sort-wrap select:focus { border-color: var(--sage); }
+
+    /* ════════════════════════════════
+       GRID  (original layout)
+    ════════════════════════════════ */
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 8px 48px 100px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 18px;
+      animation: fadeUp 0.9s 0.22s ease both;
+    }
+
+    /* ════════════════════════════════
+       CARD  (original layout, v2 colours)
+    ════════════════════════════════ */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.22s, box-shadow 0.22s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* bottom accent bar slides in on hover */
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, var(--sage), var(--rose));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(58,46,36,0.1);
+    }
+
+    .card:hover::after { transform: scaleX(1); }
+
+    /* cover image */
+    .card-cover {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      display: block;
+      background: var(--border);
+      transition: opacity 0.2s;
+    }
+
+    .card-cover.loading { opacity: 0; }
+
+    .card-body {
+      padding: 16px 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .cat-tag {
+      display: inline-block;
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 400;
+      width: fit-content;
+    }
+
+    .card-title {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-optical-sizing: auto;
+      font-size: 0.97rem;
+      line-height: 1.45;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .card-stars { display: flex; gap: 3px; }
+
+    .star { width: 8px; height: 8px; border-radius: 50%; }
+    .star.on  { background: var(--warm); }
+    .star.off { background: var(--blush); }
+
+    .card-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-author {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: var(--moss);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60%;
+    }
+
+    .card-year {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .card-link {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--sage);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s;
+      width: fit-content;
+    }
+
+    .card-link:hover { border-bottom-color: var(--sage); }
+
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px 0;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 1.4rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      header, .deco, .controls, .grid { padding-left: 20px; padding-right: 20px; }
+      header { padding-top: 40px; }
+    }
+
+    /* ── Card cover wrapper (for list-btn positioning) ── */
+    .card-cover-wrap { position: relative; }
+
+    /* ── List button on card ── */
+    .list-btn {
+      position: absolute; top: 8px; right: 8px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(250,247,242,0.92);
+      border: 1px solid var(--border);
+      cursor: pointer; font-size: 13px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2; transition: all 0.18s; color: var(--muted);
+    }
+    .list-btn:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.12); color: var(--text); }
+    .list-btn.want    { background: #eaf5ee; color: #3a8050; border-color: #7a9678; }
+    .list-btn.reading { background: #f5f2ea; color: #8a7030; border-color: var(--warm); }
+    .list-btn.read    { background: #eaf0f5; color: #406888; border-color: #406888; }
+
+    /* ── My Lists toggle ── */
+    .my-lists-btn {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; padding: 5px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 400;
+      color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap; transition: all 0.18s;
+    }
+    .my-lists-btn:hover  { border-color: var(--moss); color: var(--text); }
+    .my-lists-btn.active { background: var(--moss); border-color: var(--moss); color: white; }
+    .my-lists-badge {
+      background: var(--sage); color: white;
+      border-radius: 999px; padding: 1px 6px; font-size: 9px;
+    }
+
+    /* ── Panel overlay ── */
+    .panel-overlay {
+      position: fixed; inset: 0;
+      background: rgba(58,46,36,0.18);
+      backdrop-filter: blur(2px);
+      z-index: 200; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .panel-overlay.open { opacity: 1; pointer-events: auto; }
+
+    /* ── Panel ── */
+    .panel {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 360px; max-width: 95vw;
+      background: var(--bg); border-left: 1px solid var(--border);
+      z-index: 201; overflow: hidden;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: -4px 0 24px rgba(58,46,36,0.08);
+    }
+    .panel.open { transform: translateX(0); }
+
+    .panel-head {
+      padding: 26px 22px 18px; flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .panel-head h3 {
+      font-family: 'Fraunces', serif; font-weight: 300;
+      font-size: 1.2rem; color: var(--text);
+    }
+    .panel-close {
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 16px; width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .panel-close:hover { background: var(--blush); color: var(--rose); }
+
+    .panel-body { overflow-y: auto; flex: 1; padding: 18px 22px 40px; }
+
+    .panel-section { margin-bottom: 28px; }
+    .panel-section-head {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .panel-section-label {
+      font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); flex: 1;
+    }
+    .panel-section-n {
+      font-size: 9px; background: var(--blush); color: var(--rose);
+      border-radius: 999px; padding: 1px 8px;
+    }
+    .panel-empty {
+      font-family: 'Fraunces', serif; font-style: italic;
+      font-size: 0.85rem; color: var(--muted); padding: 6px 0;
+    }
+    .panel-book {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+    }
+    .panel-cover {
+      width: 30px; height: 44px; object-fit: cover;
+      border-radius: 3px; background: var(--blush);
+      flex-shrink: 0; display: block;
+    }
+    .panel-book-info { flex: 1; min-width: 0; }
+    .panel-book-title {
+      font-family: 'Fraunces', serif; font-weight: 300;
+      font-size: 0.8rem; line-height: 1.3; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .panel-book-author { font-size: 9.5px; color: var(--muted); margin-top: 2px; }
+    .panel-remove {
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 12px; flex-shrink: 0; width: 22px; height: 22px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      transition: color 0.15s, background 0.15s;
+    }
+    .panel-remove:hover { color: var(--rose); background: var(--blush); }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Curated collection</p>
+  <h1>A little <em>bookshelf</em></h1>
+  <p class="header-tagline">real books from the Open Library · track what you've read</p>
+  <div class="header-stats">
+    <div class="stat">
+      <span class="stat-num" id="count">500</span>
+      <span class="stat-label">titles</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="genre-count">—</span>
+      <span class="stat-label">genres</span>
+    </div>
+  </div>
+</header>
+
+<div class="deco">· ✦ ·</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="search" id="search" placeholder="Search titles or authors…" />
+  </div>
+  <div class="filter-row" id="filters">
+    <button class="filter-btn active" data-f="all">All</button>
+  </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="panel-overlay" id="panelOverlay"></div>
+<aside class="panel" id="panel">
+  <div class="panel-head">
+    <h3>My Reading Lists</h3>
+    <button class="panel-close" id="panelClose">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</aside>
+
+<script src="books_data.js"></script>
+<script>
+  // ── HTML escape ────────────────────────────────────────────────
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+                    .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Reading Lists (localStorage) ──────────────────────────────
+  const LISTS_KEY = 'bookshelf_lists';
+  let lists = { want: new Set(), reading: new Set(), read: new Set() };
+
+  function saveLists() {
+    localStorage.setItem(LISTS_KEY, JSON.stringify({
+      want: [...lists.want], reading: [...lists.reading], read: [...lists.read]
+    }));
+  }
+
+  function loadLists() {
+    try {
+      const d = JSON.parse(localStorage.getItem(LISTS_KEY) || '{}');
+      lists.want    = new Set(d.want    || []);
+      lists.reading = new Set(d.reading || []);
+      lists.read    = new Set(d.read    || []);
+    } catch(e) {}
+  }
+
+  function getBookList(title) {
+    if (lists.want.has(title))    return 'want';
+    if (lists.reading.has(title)) return 'reading';
+    if (lists.read.has(title))    return 'read';
+    return null;
+  }
+
+  function setBookList(title, listKey) {
+    lists.want.delete(title); lists.reading.delete(title); lists.read.delete(title);
+    if (listKey) lists[listKey].add(title);
+    saveLists();
+    // update button(s) in the grid without full re-render
+    document.querySelectorAll('[data-list-btn]').forEach(btn => {
+      if (btn.dataset.listBtn !== title) return;
+      const state = getBookList(title);
+      btn.className = `list-btn${state ? ' ' + state : ''}`;
+      btn.textContent = state ? LIST_ICONS[state] : '+';
+      btn.title = state ? LIST_TIPS[state] : 'Add to reading list';
+    });
+    updateBadge();
+    if (document.getElementById('panel').classList.contains('open')) renderPanel();
+  }
+
+  function totalListed() { return lists.want.size + lists.reading.size + lists.read.size; }
+
+  function updateBadge() {
+    const n = totalListed();
+    const badge = document.getElementById('myListsBadge');
+    if (badge) { badge.textContent = n; badge.style.display = n > 0 ? '' : 'none'; }
+  }
+
+  // ── Panel ──────────────────────────────────────────────────────
+  const PANEL_SECTIONS = [
+    { key: 'want',    label: 'Want to Read',      color: '#3a8050' },
+    { key: 'reading', label: 'Currently Reading', color: '#8a7030' },
+    { key: 'read',    label: 'Already Read',      color: '#406888' },
+  ];
+
+  const bookByTitle = Object.fromEntries(books.map(b => [b.title, b]));
+
+  function openPanel() {
+    document.getElementById('panel').classList.add('open');
+    document.getElementById('panelOverlay').classList.add('open');
+    document.getElementById('myListsBtn').classList.add('active');
+    renderPanel();
+  }
+
+  function closePanel() {
+    document.getElementById('panel').classList.remove('open');
+    document.getElementById('panelOverlay').classList.remove('open');
+    document.getElementById('myListsBtn').classList.remove('active');
+  }
+
+  function renderPanel() {
+    document.getElementById('panelBody').innerHTML = PANEL_SECTIONS.map(s => {
+      const titles = [...lists[s.key]];
+      return `
+        <div class="panel-section">
+          <div class="panel-section-head">
+            <span class="panel-dot" style="background:${s.color}"></span>
+            <span class="panel-section-label">${s.label}</span>
+            <span class="panel-section-n">${titles.length}</span>
+          </div>
+          ${titles.length === 0
+            ? '<p class="panel-empty">Nothing here yet.</p>'
+            : titles.map(title => {
+                const b = bookByTitle[title];
+                if (!b) return '';
+                return `
+                  <div class="panel-book">
+                    ${b.image
+                      ? `<img class="panel-cover" src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy" />`
+                      : `<div class="panel-cover"></div>`}
+                    <div class="panel-book-info">
+                      <div class="panel-book-title">${esc(b.title)}</div>
+                      <div class="panel-book-author">${esc(b.author)}</div>
+                    </div>
+                    <button class="panel-remove" data-panel-remove="${esc(b.title)}" title="Remove">✕</button>
+                  </div>`;
+              }).join('')
+          }
+        </div>`;
+    }).join('');
+  }
+
+  // ── List button helpers ────────────────────────────────────────
+  const LIST_STATES = [null, 'want', 'reading', 'read'];
+  const LIST_ICONS  = { want: '🔖', reading: '📖', read: '✓' };
+  const LIST_TIPS   = { want: 'Want to Read', reading: 'Currently Reading', read: 'Already Read' };
+
+  function listBtnHTML(title) {
+    const state = getBookList(title);
+    const cls   = `list-btn${state ? ' ' + state : ''}`;
+    const icon  = state ? LIST_ICONS[state] : '+';
+    const tip   = state ? LIST_TIPS[state]  : 'Add to reading list';
+    return `<button class="${cls}" data-list-btn="${esc(title)}" title="${tip}">${icon}</button>`;
+  }
+
+  // ── Genre colours (30 to cover all new genres) ────────────────
+  const GENRE_PALETTE = [
+    ['#f5f0ea','#906840'], ['#eaeef5','#4a6a9a'], ['#f5eae8','#a05040'],
+    ['#eaf5f5','#308888'], ['#f5f2ea','#8a7030'], ['#f5f0e8','#7a6050'],
+    ['#eaf5ee','#3a8050'], ['#eaf0f5','#406888'], ['#f0eaf5','#705898'],
+    ['#f5eaee','#984060'], ['#eaf5f0','#309068'], ['#f5eeea','#a0685c'],
+    ['#f5eaf5','#904890'], ['#f5f5ea','#787830'], ['#eaeaf5','#5a50a0'],
+    ['#f5eaed','#9a4a60'], ['#eaf4f5','#407888'], ['#f0f5ea','#608040'],
+    ['#f5eaf0','#905060'], ['#eaf5f8','#307890'], ['#f8f0ea','#905828'],
+    ['#eaeaf8','#484898'], ['#f5f8ea','#587828'], ['#f8eaea','#983838'],
+    ['#eaf8f5','#287858'], ['#f5eaf8','#885090'], ['#eaf0f8','#385890'],
+    ['#f8f5ea','#887028'], ['#eaf8ea','#388838'], ['#f8eaf5','#785090'],
+  ];
+
+  const cats = [...new Set(books.map(b => b.category))].sort();
+  const catColor = Object.fromEntries(
+    cats.map((c, i) => [c, GENRE_PALETTE[i % GENRE_PALETTE.length]])
+  );
+
+  document.getElementById('genre-count').textContent = cats.length;
+
+  // ── Controls setup ────────────────────────────────────────────
+  const fRow = document.getElementById('filters');
+
+  const sortWrap = document.createElement('div');
+  sortWrap.className = 'sort-wrap';
+  sortWrap.innerHTML = `<select id="sort">
+    <option value="default">Default order</option>
+    <option value="rating-desc">Highest rated</option>
+    <option value="year-desc">Newest first</option>
+    <option value="year-asc">Oldest first</option>
+    <option value="title">Title A–Z</option>
+  </select>`;
+
+  cats.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn'; btn.dataset.f = c; btn.textContent = c;
+    fRow.appendChild(btn);
+  });
+  fRow.appendChild(sortWrap);
+
+  // My Lists button
+  const mlBtn = document.createElement('button');
+  mlBtn.id = 'myListsBtn'; mlBtn.className = 'filter-btn my-lists-btn';
+  mlBtn.innerHTML = '📚 My Lists <span id="myListsBadge" class="my-lists-badge" style="display:none">0</span>';
+  fRow.appendChild(mlBtn);
+
+  // ── Render ────────────────────────────────────────────────────
+  let active = 'all', query = '';
+
+  function stars(n) {
+    return Array.from({length: 5}, (_, i) =>
+      `<span class="star ${i < n ? 'on' : 'off'}"></span>`
+    ).join('');
+  }
+
+  function coverEl(b) {
+    if (b.image) {
+      return `<img class="card-cover loading" src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy"
+                   onload="this.classList.remove('loading')" onerror="this.style.display='none'" />`;
+    }
+    return `<div class="card-cover" style="display:flex;align-items:center;justify-content:center;background:var(--blush)">
+               <span style="font-size:1.8rem;opacity:0.3">📖</span>
+             </div>`;
+  }
+
+  function render() {
+    const sort = document.getElementById('sort').value;
+    let list = books.filter(b =>
+      (active === 'all' || b.category === active) &&
+      (!query || b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query))
+    );
+    if (sort === 'rating-desc') list.sort((a, b) => b.rating - a.rating);
+    if (sort === 'year-desc')   list.sort((a, b) => (parseInt(b.year)||0) - (parseInt(a.year)||0));
+    if (sort === 'year-asc')    list.sort((a, b) => (parseInt(a.year)||9999) - (parseInt(b.year)||9999));
+    if (sort === 'title')       list.sort((a, b) => a.title.localeCompare(b.title));
+
+    document.getElementById('count').textContent = list.length.toLocaleString();
+
+    if (!list.length) {
+      document.getElementById('grid').innerHTML = '<p class="empty">Nothing found in the bookshelf.</p>';
+      return;
+    }
+
+    document.getElementById('grid').innerHTML = list.map(b => {
+      const [bg, fg] = catColor[b.category] || ['#f5f5f0', '#888'];
+      return `
+        <div class="card">
+          <div class="card-cover-wrap">
+            ${coverEl(b)}
+            ${listBtnHTML(b.title)}
+          </div>
+          <div class="card-body">
+            <span class="cat-tag" style="background:${bg};color:${fg}">${esc(b.category)}</span>
+            <h2 class="card-title">${esc(b.title)}</h2>
+            <div class="card-stars">${stars(b.rating)}</div>
+            <div class="card-foot">
+              <span class="card-author">${esc(b.author)}</span>
+              <span class="card-year">${esc(b.year)}</span>
+            </div>
+            <a class="card-link" href="${esc(b.url)}" target="_blank" rel="noopener">Open Library →</a>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Event listeners ───────────────────────────────────────────
+  fRow.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn:not(.my-lists-btn)');
+    if (btn) {
+      document.querySelectorAll('.filter-btn:not(.my-lists-btn)').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active'); active = btn.dataset.f; render();
+    }
+  });
+
+  mlBtn.addEventListener('click', () => {
+    document.getElementById('panel').classList.contains('open') ? closePanel() : openPanel();
+  });
+
+  document.getElementById('panelOverlay').addEventListener('click', closePanel);
+  document.getElementById('panelClose').addEventListener('click', closePanel);
+
+  document.getElementById('search').addEventListener('input', e => {
+    query = e.target.value.toLowerCase(); render();
+  });
+
+  document.addEventListener('change', e => { if (e.target.id === 'sort') render(); });
+
+  // Grid: list button clicks (event delegation)
+  document.getElementById('grid').addEventListener('click', e => {
+    const btn = e.target.closest('[data-list-btn]');
+    if (!btn) return;
+    e.preventDefault();
+    const title = btn.dataset.listBtn;
+    const idx = LIST_STATES.indexOf(getBookList(title));
+    setBookList(title, LIST_STATES[(idx + 1) % LIST_STATES.length]);
+  });
+
+  // Panel: remove buttons
+  document.getElementById('panelBody').addEventListener('click', e => {
+    const btn = e.target.closest('[data-panel-remove]');
+    if (btn) setBookList(btn.dataset.panelRemove, null);
+  });
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('panel').classList.contains('open')) {
+      e.preventDefault();
+      closePanel();
+    }
+  }, true);
+
+  // ── Init ──────────────────────────────────────────────────────
+  loadLists();
+  updateBadge();
+  render();
+</script>
+
+</body>
+</html>
